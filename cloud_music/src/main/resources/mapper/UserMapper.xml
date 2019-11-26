@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.musicweb.dao.UserDao">
+
+    	<!--  resultMap AlbumMap  -->
+    <resultMap id="AlbumMap" type="com.musicweb.domain.Album">
+    	<id column="id" property="id" jdbcType="NUMERIC"/>
+    	<result column="name" property="name" jdbcType="VARCHAR"/>
+    	<result column="artist_id" property="artistId" jdbcType="NUMERIC"/>
+    	<result column="region" property="region" jdbcType="TINYINT"/>
+    	<result column="style" property="style" jdbcType="TINYINT"/>
+    	<result column="intro" property="intro" jdbcType="VARCHAR"/>
+    	<result column="play_count" property="playCount" jdbcType="NUMERIC"/>
+    	<result column="release_date" property="releaseDate" jdbcType="DATE"/>
+    	<result column="image" property="image" jdbcType="VARCHAR"/>
+    	<result column="artist_name" property="artistName" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+    	<!--  resultMap SongMap  -->
+    <resultMap id="SongMap" type="com.musicweb.domain.Song">
+    	<id column="id" property="id" jdbcType="NUMERIC"/>
+    	<result column="name" property="name" jdbcType="VARCHAR"/>
+    	<result column="album_id" property="albumId" jdbcType="NUMERIC"/>
+    	<result column="album_name" property="albumName" jdbcType="VARCHAR"/>
+    	<result column="artist_id" property="artistId" jdbcType="NUMERIC"/>
+    	<result column="artist_name" property="artistName" jdbcType="VARCHAR"/>
+    	<result column="play_count" property="playCount" jdbcType="NUMERIC"/>
+    	<result column="lyrics_path" property="lyricsPath" jdbcType="VARCHAR"/>
+    	<result column="image" property="image" jdbcType="VARCHAR"/>
+    	<result column="release_date" property="releaseDate" jdbcType="DATE"/>
+    	<result column="language" property="language" jdbcType="VARCHAR"/>
+    	<result column="style" property="style" jdbcType="NUMERIC"/>
+    	<result column="file_path" property="filePath" jdbcType="VARCHAR"/>
+    	<result column="region" property="region" jdbcType="NUMERIC"/>
+    </resultMap>
+    
+    		<!--  resultMap PlaylistMap  -->
+    <resultMap id="PlaylistMap" type="com.musicweb.domain.Playlist">
+    	<id column="id" property="id" jdbcType="NUMERIC"/>
+    	<result column="name" property="name" jdbcType="VARCHAR"/>
+    	<result column="intro" property="intro" jdbcType="VARCHAR"/>
+    	<result column="image" property="image" jdbcType="VARCHAR"/>
+    </resultMap>
+    
+        	<!--  insert user  -->
+    <insert id="insert" 
+    		parameterType="com.musicweb.domain.User"
+    		useGeneratedKeys="true"
+    		keyProperty="id">
+        	insert into user (id,name,gender,pwd,security_question,security_answer,image,type, activation_code)
+        	values (#{id},#{name},#{gender},#{pwd},#{securityQuestion},#{securityAnswer},#{image},#{type}, #{activationCode})
+    </insert>
+    
+            <!--  insert Like Song  -->
+    <insert id="insertLikeSong"
+    		parameterType="map">
+        	insert into user_song (user_id,song_id)
+        	values (#{user_id},#{song_id})
+    </insert>
+    
+            <!--  insert Like Album  -->
+    <insert id="insertLikeAlbum">
+        	insert into user_album (user_id,album_id)
+        	values (#{user_id},#{album_id})
+    </insert>
+    
+            <!--  delete Like Songs  -->
+    <delete id="deleteLikeSong">
+    		delete from user_song where user_id=#{user_id} and song_id=#{song_id}
+    </delete>
+    
+            <!--  deleteLikeSongInAll  -->
+    <delete id="deleteLikeSongInAll">
+    		delete from user_song where song_id=#{id}
+    </delete>
+    
+            <!--  deleteLikeAlbumInAll  -->
+    <delete id="deleteLikeAlbumInAll">
+    		delete from user_album where album_id=#{id}
+    </delete>
+    
+                <!--  delete Like Albums  -->
+    <delete id="deleteLikeAlbum">
+    		delete from user_album where user_id=#{user_id} and album_id=#{album_id}
+    </delete>
+    
+            <!--  update user information  -->
+    <update id="update">
+    		update user set
+    			name=#{name},
+    			security_question=#{securityQuestion},
+    			security_answer=#{securityAnswer},
+    			type=#{type},
+    			gender=#{gender}
+    		where id=#{id}
+    </update> 
+     
+            <!--  update user password  -->
+    <update id="updatePassword">
+    		update user set
+    			pwd=#{pwd}
+    		where id=#{id}
+    </update>
+    
+            <!--  update user image  -->
+    <update id="updateImage">
+    		update user set
+    			image=#{image}
+    		where id=#{id}
+    </update>
+    
+            <!--  update activation  -->
+    <update id="updateActivation"
+    		parameterType="String">
+    		update user set
+    			type=1
+   			where
+   				activation_code=#{code}
+    		
+    </update>
+    
+            <!--  select user  -->
+    <select id="select"
+    		resultType="com.musicweb.domain.User">
+    		SELECT * FROM user WHERE id=#{id}
+    </select>
+    
+            <!--  select password  -->
+    <select id="selectPassword"
+    		resultType="String">
+    		SELECT pwd FROM user WHERE id=#{id}
+    </select>
+ 
+            <!--  select Like Songs  -->
+    <select id="selectLikeSongs"
+    		resultMap="SongMap">
+    		SELECT
+    			s.id id,
+    			s.name,
+    			s.album_id,
+    			alb.name album_name,
+    			art.id artist_id,
+    			art.name artist_name,
+    			s.play_count,
+    			s.lyrics_path,
+    			s.image,
+    			s.release_date,
+    			s.language,
+    			s.style,
+    			s.file_path,
+    			s.region
+    		FROM (
+    			SELECT
+    				*
+    			FROM
+    				user_song
+    			WHERE
+    				user_id=#{user_id}
+    		)	as us
+    		LEFT JOIN
+    			song as s
+    		ON
+    			us.song_id=s.id
+    		LEFT JOIN
+    			album as alb
+    		ON
+    			s.album_id=alb.id
+    		LEFT JOIN
+    			artist as art
+    		ON
+    			alb.artist_id=art.id
+    </select>
+    
+            <!--  select security question  -->
+    <select id="selectQuestion"
+    		resultType="INT">
+    		SELECT security_question FROM user WHERE id=#{id}
+    </select>
+    
+             <!--  select security answer  -->
+    <select id="selectAnswer"
+    		resultType="String">
+    		SELECT security_answer FROM user WHERE id=#{id}
+    </select>
+    
+            <!--  select Like Albums  -->
+    <select id="selectLikeAlbums"
+   			resultMap="AlbumMap">
+    		SELECT
+    			alb.id id,
+    			alb.name,
+    			alb.intro,
+    			art.id artist_id,
+    			art.name artist_name,
+    			alb.play_count,
+    			alb.image,
+    			alb.release_date,
+    			alb.region,
+    			alb.style
+    		FROM (
+    			SELECT
+    				*
+    			FROM
+    				user_album
+    			WHERE
+    				user_id=#{user_id}
+    		)	as ua
+    		LEFT JOIN
+    			album as alb
+    		ON
+    			ua.album_id=alb.id
+    		LEFT JOIN
+    			artist as art
+    		ON
+    			alb.artist_id=art.id
+    </select>
+    
+            <!--  select Playlists  -->
+    <select id="selectPlaylists"
+    		resultMap="PlaylistMap">
+    		SELECT * FROM playlist WHERE user_id=#{userId}
+    </select>    
+</mapper>

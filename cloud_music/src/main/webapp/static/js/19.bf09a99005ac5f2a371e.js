@@ -1,0 +1,2 @@
+webpackJsonp([19],{jOmo:function(e,t,r){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var n={render:function(){var e=this.$createElement;return(this._self._c||e)("div")},staticRenderFns:[]},u=r("vSla")({data:function(){return this.$router.push("/user/search"),{}}},n,!1,null,null,null);t.default=u.exports}});
+//# sourceMappingURL=19.bf09a99005ac5f2a371e.js.map
